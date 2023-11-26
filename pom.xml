@@ -47,6 +47,10 @@
             <id>luck-repo</id>
             <url>https://repo.lucko.me/</url>
         </repository>
+        <repository>
+            <id>opencollab-snapshot</id>
+            <url>https://repo.opencollab.dev/main/</url>
+        </repository>
     </repositories>
 
 </project>

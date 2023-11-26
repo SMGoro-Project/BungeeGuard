@@ -39,6 +39,7 @@ import me.lucko.bungeeguard.backend.BungeeGuardBackend;
 import me.lucko.bungeeguard.backend.TokenStore;
 import me.lucko.bungeeguard.backend.listener.AbstractHandshakeListener;
 import me.lucko.bungeeguard.spigot.BungeeCordHandshake;
+import me.lucko.bungeeguard.spigot.BungeeGuardBackendPlugin;
 import me.lucko.bungeeguard.spigot.LegacyProtocolKick;
 
 import net.md_5.bungee.api.chat.TextComponent;
@@ -85,6 +86,12 @@ public class ProtocolHandshakeListener extends AbstractHandshakeListener {
             PacketType.Protocol state = packet.getProtocols().read(0);
             if (state != PacketType.Protocol.LOGIN) {
                 return;
+            }
+            BungeeGuardBackendPlugin spigotPlugin = (BungeeGuardBackendPlugin) this.plugin;
+            if (spigotPlugin.getFloodgateApiHolder() != null) {
+                if (spigotPlugin.getFloodgateApiHolder().isFloodgatePlayer(event.getPlayer())) {
+                    return;
+                }
             }
 
             String handshake = packet.getStrings().read(0);

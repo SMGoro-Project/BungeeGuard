@@ -30,10 +30,15 @@ import me.lucko.bungeeguard.backend.TokenStore;
 import me.lucko.bungeeguard.spigot.listener.PaperHandshakeListener;
 import me.lucko.bungeeguard.spigot.listener.ProtocolHandshakeListener;
 
+import me.lucko.bungeeguard.spigot.support.FloodgateApiHolder;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -44,8 +49,9 @@ import java.util.List;
  *
  * The token is included within the player's profile properties, but removed during the handshake.
  */
-public class BungeeGuardBackendPlugin extends JavaPlugin implements BungeeGuardBackend {
+public class BungeeGuardBackendPlugin extends JavaPlugin implements BungeeGuardBackend, Listener {
 
+    private FloodgateApiHolder floodgateApiHolder;
     private TokenStore tokenStore;
 
     @Override
@@ -90,6 +96,10 @@ public class BungeeGuardBackendPlugin extends JavaPlugin implements BungeeGuardB
             getLogger().severe("------------------------------------------------------------");
             getServer().shutdown();
         }
+        if (Bukkit.getPluginManager().getPlugin("floodgate") != null) {
+            this.floodgateApiHolder = new FloodgateApiHolder();
+        }
+        Bukkit.getPluginManager().registerEvents(this, this);
     }
 
     @Override
@@ -115,6 +125,10 @@ public class BungeeGuardBackendPlugin extends JavaPlugin implements BungeeGuardB
         return ChatColor.translateAlternateColorCodes('&', getConfig().getString(key));
     }
 
+    public FloodgateApiHolder getFloodgateApiHolder() {
+        return floodgateApiHolder;
+    }
+
     @Override
     public List<String> getTokens() {
         return getConfig().getStringList("allowed-tokens");
@@ -138,6 +152,13 @@ public class BungeeGuardBackendPlugin extends JavaPlugin implements BungeeGuardB
             return true;
         } catch (ClassNotFoundException e) {
             return false;
+        }
+    }
+
+    @EventHandler
+    private void onFloodgateLoad(PluginEnableEvent event) {
+        if (event.getPlugin().getName().equalsIgnoreCase("floodgate")) {
+            this.floodgateApiHolder = new FloodgateApiHolder();
         }
     }
 
